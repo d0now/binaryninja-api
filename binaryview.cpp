@@ -240,6 +240,36 @@ void BinaryDataNotification::TypeFieldReferenceChangedCallback(
 }
 
 
+void BinaryDataNotification::SectionAddedCallback(void* ctxt, BNBinaryView* data, BNSection* section)
+{
+	BinaryDataNotification* notify = (BinaryDataNotification*)ctxt;
+	Ref<BinaryView> view = new BinaryView(BNNewViewReference(data));
+	Ref<Section> sectionObj = new Section(BNNewSectionReference(section));
+
+	notify->OnSectionAdded(view, sectionObj);
+}
+
+
+void BinaryDataNotification::SectionUpdatedCallback(void* ctxt, BNBinaryView* data, BNSection* section)
+{
+	BinaryDataNotification* notify = (BinaryDataNotification*)ctxt;
+	Ref<BinaryView> view = new BinaryView(BNNewViewReference(data));
+	Ref<Section> sectionObj = new Section(BNNewSectionReference(section));
+
+	notify->OnSectionUpdated(view, sectionObj);
+}
+
+
+void BinaryDataNotification::SectionRemovedCallback(void* ctxt, BNBinaryView* data, BNSection* section)
+{
+	BinaryDataNotification* notify = (BinaryDataNotification*)ctxt;
+	Ref<BinaryView> view = new BinaryView(BNNewViewReference(data));
+	Ref<Section> sectionObj = new Section(BNNewSectionReference(section));
+
+	notify->OnSectionRemoved(view, sectionObj);
+}
+
+
 BinaryDataNotification::BinaryDataNotification()
 {
 	m_callbacks.context = this;
@@ -267,6 +297,9 @@ BinaryDataNotification::BinaryDataNotification()
 	m_callbacks.typeUndefined = TypeUndefinedCallback;
 	m_callbacks.typeReferenceChanged = TypeReferenceChangedCallback;
 	m_callbacks.typeFieldReferenceChanged = TypeFieldReferenceChangedCallback;
+	m_callbacks.sectionAdded = SectionAddedCallback;
+	m_callbacks.sectionUpdated = SectionUpdatedCallback;
+	m_callbacks.sectionRemoved = SectionRemovedCallback;
 }
 
 

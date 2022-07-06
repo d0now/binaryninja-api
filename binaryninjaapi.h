@@ -1100,6 +1100,7 @@ namespace BinaryNinja {
 	class Tag;
 	class TagType;
 	struct TagReference;
+	class Section;
 
 	class BinaryDataNotification
 	{
@@ -1132,6 +1133,10 @@ namespace BinaryNinja {
 		static void TypeReferenceChangedCallback(void* ctx, BNBinaryView* data, BNQualifiedName* name, BNType* type);
 		static void TypeFieldReferenceChangedCallback(
 		    void* ctx, BNBinaryView* data, BNQualifiedName* name, uint64_t offset);
+		static void SectionAddedCallback(void* ctx, BNBinaryView* data, BNSection* section);
+		static void SectionUpdatedCallback(void* ctx, BNBinaryView* data, BNSection* section);
+		static void SectionRemovedCallback(void* ctx, BNBinaryView* data, BNSection* section);
+
 
 	  public:
 		BinaryDataNotification();
@@ -1269,6 +1274,21 @@ namespace BinaryNinja {
 			(void)data;
 			(void)name;
 			(void)offset;
+		}
+		virtual void OnSectionAdded(BinaryView* data, Section* section)
+		{
+			(void)data;
+			(void)section;
+		}
+		virtual void OnSectionUpdated(BinaryView* data, Section* section)
+		{
+			(void)data;
+			(void)section;
+		}
+		virtual void OnSectionRemoved(BinaryView* data, Section* section)
+		{
+			(void)data;
+			(void)section;
 		}
 	};
 

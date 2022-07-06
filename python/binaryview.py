@@ -210,6 +210,14 @@ class BinaryDataNotification:
 	def type_field_ref_changed(self, view: 'BinaryView', name: '_types.QualifiedName', offset: int) -> None:
 		pass
 
+	def section_added(self, view: 'BinaryView', section: 'Section') -> None:
+		pass
+
+	def section_updated(self, view: 'BinaryView', section: 'Section') -> None:
+		pass
+
+	def section_removed(self, view: 'BinaryView', section: 'Section') -> None:
+		pass
 
 class StringReference:
 	_decodings = {
@@ -655,6 +663,33 @@ class BinaryDataNotificationCallbacks:
 		try:
 			qualified_name = _types.QualifiedName._from_core_struct(name[0])
 			self._notify.type_field_ref_changed(self._view, qualified_name, offset)
+		except:
+			log_error(traceback.format_exc())
+
+	def _section_added(self, ctxt, view: core.BNBinaryView, section_obj: core.BNSection) -> None:
+		try:
+			section_handle = core.BNNewSectionReference(section_obj)
+			assert section_handle is not None, "core.BNNewSectionReference returned None"
+			result = Section(section_handle)
+			self._notify.section_added(self._view, result)
+		except:
+			log_error(traceback.format_exc())
+
+	def _section_updated(self, ctxt, view: core.BNBinaryView, section_obj: core.BNSection) -> None:
+		try:
+			section_handle = core.BNNewSectionReference(section_obj)
+			assert section_handle is not None, "core.BNNewSectionReference returned None"
+			result = Section(section_handle)
+			self._notify.section_updated(self._view, result)
+		except:
+			log_error(traceback.format_exc())
+
+	def _section_removed(self, ctxt, view: core.BNBinaryView, section_obj: core.BNSection) -> None:
+		try:
+			section_handle = core.BNNewSectionReference(section_obj)
+			assert section_handle is not None, "core.BNNewSectionReference returned None"
+			result = Section(section_handle)
+			self._notify.section_removed(self._view, result)
 		except:
 			log_error(traceback.format_exc())
 

@@ -1373,6 +1373,9 @@ extern "C"
 		void (*typeUndefined)(void* ctxt, BNBinaryView* view, BNQualifiedName* name, BNType* type);
 		void (*typeReferenceChanged)(void* ctxt, BNBinaryView* view, BNQualifiedName* name, BNType* type);
 		void (*typeFieldReferenceChanged)(void* ctxt, BNBinaryView* view, BNQualifiedName* name, uint64_t offset);
+		void (*sectionAdded)(void* ctxt, BNBinaryView* view, BNSection* section);
+		void (*sectionUpdated)(void* ctxt, BNBinaryView* view, BNSection* section);
+		void (*sectionRemoved)(void* ctxt, BNBinaryView* view, BNSection* section);
 	};
 
 	struct BNFileAccessor
