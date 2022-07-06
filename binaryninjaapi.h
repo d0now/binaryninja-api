@@ -1101,6 +1101,7 @@ namespace BinaryNinja {
 	class TagType;
 	struct TagReference;
 	class Section;
+	class Segment;
 
 	class BinaryDataNotification
 	{
@@ -1133,6 +1134,9 @@ namespace BinaryNinja {
 		static void TypeReferenceChangedCallback(void* ctx, BNBinaryView* data, BNQualifiedName* name, BNType* type);
 		static void TypeFieldReferenceChangedCallback(
 		    void* ctx, BNBinaryView* data, BNQualifiedName* name, uint64_t offset);
+		static void SegmentAddedCallback(void* ctx, BNBinaryView* data, BNSegment* segment);
+		static void SegmentUpdatedCallback(void* ctx, BNBinaryView* data, BNSegment* segment);
+		static void SegmentRemovedCallback(void* ctx, BNBinaryView* data, BNSegment* segment);
 		static void SectionAddedCallback(void* ctx, BNBinaryView* data, BNSection* section);
 		static void SectionUpdatedCallback(void* ctx, BNBinaryView* data, BNSection* section);
 		static void SectionRemovedCallback(void* ctx, BNBinaryView* data, BNSection* section);
@@ -1274,6 +1278,21 @@ namespace BinaryNinja {
 			(void)data;
 			(void)name;
 			(void)offset;
+		}
+		virtual void OnSegmentAdded(BinaryView* data, Segment* segment)
+		{
+			(void)data;
+			(void)segment;
+		}
+		virtual void OnSegmentUpdated(BinaryView* data, Segment* segment)
+		{
+			(void)data;
+			(void)segment;
+		}
+		virtual void OnSegmentRemoved(BinaryView* data, Segment* segment)
+		{
+			(void)data;
+			(void)segment;
 		}
 		virtual void OnSectionAdded(BinaryView* data, Section* section)
 		{
