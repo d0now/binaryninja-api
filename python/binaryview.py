@@ -48,6 +48,7 @@ from . import typelibrary
 from . import fileaccessor
 from . import databuffer
 from . import basicblock
+from . import component
 from . import lineardisassembly
 from . import metadata
 from . import highlight
@@ -5708,6 +5709,30 @@ class BinaryView:
 
 	def notify_data_removed(self, offset: int, length: int) -> None:
 		core.BNNotifyDataRemoved(self.handle, offset, length)
+
+	def get_component(self, guid: str):
+		bn_component = core.BNGetComponentByGUID(self.handle, guid)
+		return component.Component(self, bn_component)
+
+	def get_components(self) -> List['Component']:
+		components = []
+		count = ctypes.c_ulonglong(0)
+		bn_components = core.BNGetComponents(self.handle, count)
+
+		for i in range(count.value):
+			_component = component.Component(self.view, bn_components[i])
+			components.append(_component)
+
+		return components
+
+	def add_component(self, _component: component.Component):
+		return core.BNAddComponent(self.handle, _component.handle)
+
+	def remove_component(self, _component: component.Component):
+		return core.BNRemoveComponent(self.handle, _component.handle)
+
+	def remove_component_by_guid(self, guid: str):
+		return core.BNRemoveComponentByGUID(self.handle, guid)
 
 	def get_strings(self, start: Optional[int] = None, length: Optional[int] = None) -> List['StringReference']:
 		"""

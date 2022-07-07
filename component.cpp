@@ -5,12 +5,6 @@ using namespace BinaryNinja;
 using namespace std;
 
 
-Ref<Component> ComponentManager::GetComponentByGUID(const std::string& guid)
-{
-	return new Component(BNGetComponentByGUID(guid.c_str()));
-}
-
-
 Component::Component(BNComponent* type)
 {
 	m_object = type;
@@ -29,6 +23,12 @@ void Component::SetName(const std::string &name)
 }
 
 
+Ref<Component> Component::GetParent()
+{
+	return new Component(BNComponentGetParent(m_object));
+}
+
+
 Ref<Component> Component::Create()
 {
 	BNComponent* component = BNComponentCreateEmpty();
@@ -42,27 +42,27 @@ std::string Component::GetGUID()
 }
 
 
-void Component::AddFunction(Ref<Function> func)
+bool Component::AddFunction(Ref<Function> func)
 {
-	BNComponentAddFunctionReference(m_object, func->GetObject(), true);
+	return BNComponentAddFunctionReference(m_object, func->GetObject(), true);
 }
 
 
-void Component::RemoveFunction(Ref<Function> func)
+bool Component::RemoveFunction(Ref<Function> func)
 {
-	BNComponentRemoveFunctionReference(m_object, func->GetObject(), true);
+	return BNComponentRemoveFunctionReference(m_object, func->GetObject(), true);
 }
 
 
-void Component::AddComponent(Ref<Component> component)
+bool Component::AddComponent(Ref<Component> component)
 {
-	BNComponentAddComponentReference(m_object, component->GetObject());
+	return BNComponentAddComponentReference(m_object, component->GetObject());
 }
 
 
-void Component::RemoveComponent(Ref<Component> component)
+bool Component::RemoveComponent(Ref<Component> component)
 {
-	BNComponentRemoveComponentReference(m_object, component->GetObject());
+	return BNComponentRemoveComponentReference(m_object, component->GetObject());
 }
 
 
@@ -76,7 +76,7 @@ std::vector<Ref<Component>> Component::GetContainedComponents()
 	components.reserve(count);
 	for (size_t i = 0; i < count; i++)
 	{
-		Ref<Component> component = new Component(BNNewComponentReference(list[i]));
+		Ref<Component> component = new Component(list[i]);
 		components.push_back(component);
 	}
 
@@ -94,7 +94,7 @@ std::vector<Ref<Function>> Component::GetContainedFunctions()
 	functions.reserve(count);
 	for (size_t i = 0; i < count; i++)
 	{
-		Ref<Function> function = new Function(BNNewFunctionReference(list[i]));
+		Ref<Function> function = new Function(list[i]);
 		functions.push_back(function);
 	}
 
@@ -112,7 +112,7 @@ std::vector<Ref<Type>> Component::GetReferencedTypes()
 	types.reserve(count);
 	for (size_t i = 0; i < count; i++)
 	{
-		Ref<Type> type = new Type(BNNewTypeReference(list[i]));
+		Ref<Type> type = new Type(list[i]);
 		types.push_back(type);
 	}
 

@@ -4,19 +4,18 @@ import inspect
 from typing import Generator, Optional, List, Tuple, Union, Mapping, Any, Dict
 from dataclasses import dataclass
 
-from binaryninja import DataVariable
+from . import binaryview
 
 from . import function
 from . import _binaryninjacore as core
 from binaryninja.types import Type
 
-from . import binaryview
 
 
 class Component:
     def __init__(self, view=None, handle=None):
 
-        self.view: binaryview.BinaryView = view
+        self.view: 'BinaryView' = view
 
         if not handle:
             self.handle = core.BNComponentCreateEmpty()
@@ -25,26 +24,34 @@ class Component:
 
         self.guid = core.BNComponentGetGUID(self.handle)
 
+    def __eq__(self, other):
+        if not isinstance(other, Component):
+            return NotImplemented
+        return core.BNComponentsEqual(self.handle, other.handle)
+
     def __repr__(self):
         return f'<Component "{self.guid[:8]}...">'
 
-    def add_function(self, func: function.Function) -> None:
-        core.BNComponentAddFunctionReference(self.handle, func.handle, True)
+    def __del__(self):
+        core.BNFreeComponent(self.handle)
+
+    def add_function(self, func: function.Function) -> bool:
+        return core.BNComponentAddFunctionReference(self.handle, func.handle, True)
 
     def contains_function(self, func: function.Function) -> bool:
         return core.BNComponentContainsFunction(self.handle, func.handle)
 
-    def remove_function(self, func: function.Function) -> None:
-        core.BNComponentRemoveFunctionReference(self.handle, func.handle, True)
+    def remove_function(self, func: function.Function) -> bool:
+        return core.BNComponentRemoveFunctionReference(self.handle, func.handle, True)
 
-    def add_component(self, component: 'Component') -> None:
-        core.BNComponentAddComponentReference(self.handle, component.handle)
+    def add_component(self, component: 'Component') -> bool:
+        return core.BNComponentAddComponentReference(self.handle, component.handle)
 
     def contains_component(self, component: 'Component') -> bool:
         return core.BNComponentContainsComponent(self.handle, component.handle)
 
-    def remove_component(self, component: 'Component') -> None:
-        core.BNComponentRemoveComponentReference(self.handle, component.handle)
+    def remove_component(self, component: 'Component') -> bool:
+        return core.BNComponentRemoveComponentReference(self.handle, component.handle)
 
     @property
     def name(self):
@@ -55,17 +62,21 @@ class Component:
         core.BNComponentSetName(self.handle, _name)
 
     @property
+    def parent(self):
+        bn_component = core.BNComponentGetParent(self.handle)
+        if bn_component is not None:
+            return Component(self.view, core.BNComponentGetParent(self.handle))
+        return None
+
+    @property
     def components(self) -> List['Component']:
         components = []
         count = ctypes.c_ulonglong(0)
         bn_components = core.BNComponentGetContainedComponents(self.handle, count)
 
         for i in range(count.value):
-            bn_component = core.BNNewComponentReference(bn_components[i])
-            component = Component(self.view, bn_component)
-            components.append(component)
+            components.append(Component(self.view, bn_components[i]))
 
-        core.BNComponentFreeContainedComponentList(bn_components, count.value)
         return components
 
     @property
@@ -79,7 +90,6 @@ class Component:
             component = function.Function(self.view, bn_component)
             functions.append(component)
 
-        core.BNComponentFreeContainedFunctionList(bn_functions, count.value)
         return functions
 
     def get_referenced_data_variables(self, recursive=False):
@@ -89,13 +99,13 @@ class Component:
             bn_data_vars = core.BNComponentGetReferencedDataVariablesRecursive(self.handle, count)
         else:
             bn_data_vars = core.BNComponentGetReferencedDataVariables(self.handle, count)
-
-        for i in range(count.value):
-            bn_data_var = bn_data_vars[i]
-            data_var = DataVariable.from_core_struct(bn_data_var, self.view)
-            data_vars.append(data_var)
-
-        core.BNComponentFreeReferencedDataVariableList(bn_data_vars, count.value)
+        try:
+            for i in range(count.value):
+                bn_data_var = bn_data_vars[i]
+                data_var = binaryview.DataVariable.from_core_struct(bn_data_var, self.view)
+                data_vars.append(data_var)
+        finally:
+            core.BNFreeDataVariables(bn_data_vars, count.value)
         return data_vars
 
     def get_referenced_types(self, recursive=False):
@@ -105,10 +115,6 @@ class Component:
         bn_types = core.BNComponentGetReferencedTypes(self.handle, count)
 
         for i in range(count.value):
-            bn_type = core.BNNewTypeReference(bn_types[i])
-            _type = Type(bn_type)
-            types.append(_type)
-
-        core.BNComponentFreeReferencedTypesList(bn_types, count.value)
+            types.append(Type(bn_types[i]))
 
         return types

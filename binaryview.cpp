@@ -2795,6 +2795,52 @@ Ref<Tag> BinaryView::CreateUserDataTag(uint64_t addr, Ref<TagType> tagType, cons
 	return tag;
 }
 
+std::vector<Ref<Component>> BinaryView::GetComponents()
+{
+
+	std::vector<Ref<Component>> components;
+
+	size_t count;
+	BNComponent** list = BNGetComponents(m_object, &count);
+
+	components.reserve(count);
+	for (size_t i = 0; i < count; i++)
+	{
+		Ref<Component> component = new Component(BNNewComponentReference(list[i]));
+		components.push_back(component);
+	}
+
+	return components;
+}
+
+std::optional<Ref<Component>> BinaryView::GetComponent(std::string guid)
+{
+	BNComponent* bncomponent = BNGetComponentByGUID(m_object, guid.c_str());
+
+	if (bncomponent)
+	{
+		auto component = new Component(BNNewComponentReference(bncomponent));
+		return std::optional<Ref<Component>>{component};
+	}
+
+	return std::nullopt;
+}
+
+bool BinaryView::AddComponent(Ref<Component> component)
+{
+	return BNAddComponent(m_object, component->m_object);
+}
+
+bool BinaryView::RemoveComponent(Ref<Component> component)
+{
+	return BNRemoveComponent(m_object, component->m_object);
+}
+
+bool BinaryView::RemoveComponentByGUID(std::string guid)
+{
+	return BNRemoveComponentByGUID(m_object, guid.c_str());
+}
+
 bool BinaryView::CanAssemble(Architecture* arch)
 {
 	return BNCanAssemble(m_object, arch->GetObject());

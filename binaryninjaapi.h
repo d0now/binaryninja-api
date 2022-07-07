@@ -1739,6 +1739,7 @@ namespace BinaryNinja {
 	class Structure;
 	class NamedTypeReference;
 	struct TypeParserResult;
+	class Component;
 
 	class QueryMetadataException : public std::exception
 	{
@@ -2074,6 +2075,12 @@ namespace BinaryNinja {
 
 		Ref<Tag> CreateAutoDataTag(uint64_t addr, Ref<TagType> tagType, const std::string& data, bool unique = false);
 		Ref<Tag> CreateUserDataTag(uint64_t addr, Ref<TagType> tagType, const std::string& data, bool unique = false);
+
+		std::vector<Ref<Component>> GetComponents();
+		std::optional<Ref<Component>> GetComponent(std::string guid);
+		bool AddComponent(Ref<Component> component);
+		bool RemoveComponent(Ref<Component> component);
+		bool RemoveComponentByGUID(std::string guid);
 
 		bool CanAssemble(Architecture* arch);
 
@@ -7063,23 +7070,17 @@ namespace BinaryNinja {
 
 		std::string GetName();
 		void SetName(const std::string &name);
+		Ref<Component> GetParent();
 
-		void AddFunction(Ref<Function> func);
-		void AddComponent(Ref<Component> component);
-		void RemoveFunction(Ref<Function> func);
-		void RemoveComponent(Ref<Component> component);
+		bool AddFunction(Ref<Function> func);
+		bool AddComponent(Ref<Component> component);
+		bool RemoveFunction(Ref<Function> func);
+		bool RemoveComponent(Ref<Component> component);
 
 		std::vector<Ref<Type>> GetReferencedTypes();
 		std::vector<Ref<Component>> GetContainedComponents();
 		std::vector<Ref<Function>> GetContainedFunctions();
 		std::vector<DataVariable> GetReferencedDataVariables();
-	};
-
-	class ComponentManager
-	{
-	public:
-		static Ref<Component> GetComponentByGUID(const std::string& guid);
-
 	};
 
 }  // namespace BinaryNinja
