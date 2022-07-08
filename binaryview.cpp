@@ -2813,9 +2813,9 @@ std::vector<Ref<Component>> BinaryView::GetComponents()
 	return components;
 }
 
-std::optional<Ref<Component>> BinaryView::GetComponentByGUID(std::string guid)
+std::optional<Ref<Component>> BinaryView::GetComponentByGuid(std::string guid)
 {
-	BNComponent* bncomponent = BNGetComponentByGUID(m_object, guid.c_str());
+	BNComponent* bncomponent = BNGetComponentByGuid(m_object, guid.c_str());
 
 	if (bncomponent)
 	{

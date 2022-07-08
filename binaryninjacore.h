@@ -5924,7 +5924,7 @@ extern "C"
 	BINARYNINJACOREAPI void BNComponentSetName(BNComponent* component, const char* name);
 
 	// TODO: move to binaryview
-	BINARYNINJACOREAPI BNComponent* BNGetComponentByGUID(BNBinaryView* view, const char *guid);
+	BINARYNINJACOREAPI BNComponent* BNGetComponentByGuid(BNBinaryView* view, const char *guid);
 	BINARYNINJACOREAPI bool BNAddComponent(BNBinaryView* view, BNComponent* component);
 	BINARYNINJACOREAPI bool BNRemoveComponentByGUID(BNBinaryView* view, const char *guid);
 	BINARYNINJACOREAPI bool BNRemoveComponent(BNBinaryView* view, BNComponent* component);

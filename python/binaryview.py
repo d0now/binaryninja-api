@@ -5711,7 +5711,7 @@ class BinaryView:
 		core.BNNotifyDataRemoved(self.handle, offset, length)
 
 	def get_component(self, guid: str):
-		bn_component = core.BNGetComponentByGUID(self.handle, guid)
+		bn_component = core.BNGetComponentByGuid(self.handle, guid)
 		return component.Component(self, bn_component)
 
 	def get_components(self) -> List['Component']:

@@ -79,20 +79,20 @@ TEST(API_Components, ComponentTests)
 
 	ASSERT_TRUE(bv->AddComponent(component));
 
-	auto c = bv->GetComponentByGUID(component->GetGUID());
+	auto c = bv->GetComponentByGuid(component->GetGUID());
 	ASSERT_TRUE(c.has_value());
 
 	ASSERT_TRUE(bv->RemoveComponent(c.value()));
-	c = bv->GetComponentByGUID(component->GetGUID());
+	c = bv->GetComponentByGuid(component->GetGUID());
 	ASSERT_FALSE(c.has_value());
 	ASSERT_EQ(bv->GetComponents().size(), 0); // This fails.
 
 	ASSERT_TRUE(bv->AddComponent(component));
-	c = bv->GetComponentByGUID(component->GetGUID());
+	c = bv->GetComponentByGuid(component->GetGUID());
 	ASSERT_TRUE(c.has_value());
 
 	bv->RemoveComponentByGUID(c.value()->GetGUID());
-	c = bv->GetComponentByGUID(component->GetGUID());
+	c = bv->GetComponentByGuid(component->GetGUID());
 	ASSERT_FALSE(c.has_value());
 
 }

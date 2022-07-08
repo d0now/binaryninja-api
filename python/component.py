@@ -135,7 +135,7 @@ ComponentTests.run_tests()
 class Component:
     def __init__(self, view=None, handle=None):
 
-        self.view: 'BinaryView' = view
+        self.view: 'binaryview.BinaryView' = view
 
         if not handle:
             self.handle = core.BNComponentCreateEmpty()
@@ -149,11 +149,35 @@ class Component:
             return NotImplemented
         return core.BNComponentsEqual(self.handle, other.handle)
 
+    def __ne__(self, other):
+        if not isinstance(other, Component):
+            return NotImplemented
+        return not self.__eq__(other)
+
     def __repr__(self):
-        return f'<Component "{self.guid[:8]}...">'
+        return f'<Component "{self.name}" "({self.guid[:8]}...")>'
 
     def __del__(self):
         core.BNFreeComponent(self.handle)
+
+    def __str__(self):
+        return self._sprawl_component(self)
+
+    def _sprawl_component(self, c, depth=1, out=None):
+        """
+        Recursive quick function to print out the component's tree of items
+
+        :param c: Current cycle's component. On initial call, pass `self`
+        :param depth: Current tree depth.
+        :param out: Current text
+        :return:
+        """
+        _out = ([repr(c)] if not out else out.split('\n')) + [('  ' * depth + repr(f)) for f in c.functions]
+        _out += ['  ' * (depth+1) + repr(i) for i in (c.get_referenced_data_variables() + c.get_referenced_types())]
+        for i in c.components:
+            _out.append('  ' * depth + repr(i))
+            _out = self._sprawl_component(i, depth+1, '\n'.join(_out)).split('\n')
+        return '\n'.join(_out)
 
     def add_function(self, func: function.Function) -> bool:
         return core.BNComponentAddFunctionReference(self.handle, func.handle, True)
@@ -232,7 +256,10 @@ class Component:
         types = []
         count = ctypes.c_ulonglong(0)
 
-        bn_types = core.BNComponentGetReferencedTypes(self.handle, count)
+        if recursive:
+            bn_types = core.BNComponentGetReferencedTypesRecursive(self.handle, count)
+        else:
+            bn_types = core.BNComponentGetReferencedTypes(self.handle, count)
 
         for i in range(count.value):
             types.append(Type(bn_types[i]))
