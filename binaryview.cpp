@@ -2806,20 +2806,20 @@ std::vector<Ref<Component>> BinaryView::GetComponents()
 	components.reserve(count);
 	for (size_t i = 0; i < count; i++)
 	{
-		Ref<Component> component = new Component(BNNewComponentReference(list[i]));
+		Ref<Component> component = new Component(list[i]);
 		components.push_back(component);
 	}
 
 	return components;
 }
 
-std::optional<Ref<Component>> BinaryView::GetComponent(std::string guid)
+std::optional<Ref<Component>> BinaryView::GetComponentByGUID(std::string guid)
 {
 	BNComponent* bncomponent = BNGetComponentByGUID(m_object, guid.c_str());
 
 	if (bncomponent)
 	{
-		auto component = new Component(BNNewComponentReference(bncomponent));
+		auto component = new Component(bncomponent);
 		return std::optional<Ref<Component>>{component};
 	}
 

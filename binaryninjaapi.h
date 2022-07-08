@@ -2077,7 +2077,7 @@ namespace BinaryNinja {
 		Ref<Tag> CreateUserDataTag(uint64_t addr, Ref<TagType> tagType, const std::string& data, bool unique = false);
 
 		std::vector<Ref<Component>> GetComponents();
-		std::optional<Ref<Component>> GetComponent(std::string guid);
+		std::optional<Ref<Component>> GetComponentByGUID(std::string guid);
 		bool AddComponent(Ref<Component> component);
 		bool RemoveComponent(Ref<Component> component);
 		bool RemoveComponentByGUID(std::string guid);
@@ -7063,8 +7063,7 @@ namespace BinaryNinja {
 	{
 	public:
 
-		static Ref<Component> Create();
-
+		Component();
 		Component(BNComponent* type);
 		std::string GetGUID();
 

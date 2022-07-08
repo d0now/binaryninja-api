@@ -10,7 +10,127 @@ from . import function
 from . import _binaryninjacore as core
 from binaryninja.types import Type
 
+"""
+from typing import Iterable
+import traceback
 
+class ScriptBasedTestRunner:
+    def __init__(self) -> None:
+        self.bv = bv
+
+    def assertEqual(self, a, b, message=""):
+        assert a == b, message
+
+    def assertContains(self, haystack, needle):
+        assert needle in haystack
+
+    def assertLenEqual(self, a: Iterable, size, message=""):
+        assert len(a) == size, message
+
+    def assertLenGreater(self, a: Iterable, minimum_size, message=""):
+        assert len(a) > minimum_size, message
+
+    @classmethod
+    def run_tests(cls):
+
+        print(f'--------\n{cls.__name__}\n--------')
+
+        method_list = [func for func in dir(cls) if callable(getattr(cls, func)) and func.startswith('test')]
+        
+        jobs = []
+        inst = cls()
+        for meth in method_list:
+            func = getattr(inst, meth)
+            try:
+                func()
+                jobs.append(('PASS', ''))
+            except AssertionError as ex:
+                jobs.append(('FAIL', f'{cls.__name__}.{meth}: {str(ex) if str(ex) != "" else traceback.format_exc()}'))
+
+        total_count = 0
+        pass_count = 0
+        fails = []
+        for job in jobs:
+            if job[0] == 'PASS':
+                pass_count += 1
+            else:
+                fails.append(job)
+            total_count += 1
+        print(f'{pass_count}/{total_count} PASSED')
+        for fail in fails:
+            print(f'{fail[0]}: {fail[1]}', file=sys.stderr)
+
+
+
+class ComponentTests(ScriptBasedTestRunner):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def test_bv_components(self):
+        c = Component(self.bv)
+        guid = c.guid
+        c.name = "ACoolName"
+        self.assertEqual(c.name, "ACoolName")
+        f = self.bv.get_functions_by_name('main')[0]
+        c.add_function(f)
+
+        assert self.bv.add_component(c)
+        self.assertLenGreater(self.bv.get_components(), 0)
+        assert self.bv.remove_component(c)
+        self.assertLenEqual(self.bv.get_components(), 0)
+        assert self.bv.add_component(c)
+        for co in self.bv.get_components():
+            assert self.bv.remove_component_by_guid(co.guid)
+        self.assertLenEqual(self.bv.get_components(), 0)
+
+
+    def test_components(self):
+
+        c = Component(self.bv)
+        guid = c.guid
+        c.name = "ACoolName"
+        self.assertEqual(c.name, "ACoolName")
+        f = self.bv.get_functions_by_name('main')[0]
+        c.remove_function(f)
+        c.add_function(f)
+
+        self.assertLenGreater(c.get_referenced_data_variables(), 0)
+        self.assertLenGreater(c.get_referenced_types(), 0)
+        assert c.contains_function(f)
+
+        c.remove_function(f)
+        self.assertLenEqual(c.get_referenced_data_variables(), 0)
+        self.assertLenEqual(c.get_referenced_types(), 0)
+        assert not c.contains_function(f)
+
+        c.add_function(f)
+
+        pC = Component(self.bv)
+        pC.add_component(c)
+        assert pC.contains_component(c)
+        ppC = Component(self.bv)
+        ppC.add_function(f)
+        ppC.add_component(pC)
+        assert pC.parent == ppC
+        assert pC.parent != c
+        print(ppC.parent)
+
+        print(self.sprawl_component(ppC))
+
+        pC.remove_component(c)
+        assert not pC.contains_component(c)
+
+    def sprawl_component(self, c, depth=1, out=None):
+        _out = ([repr(c)] if not out else out.split('\n')) + [('  ' * depth + repr(f)) for f in c.functions]
+        _out += ['  ' * (depth+1) + repr(i) for i in (c.get_referenced_data_variables() + c.get_referenced_types())]
+        for i in c.components:
+            _out.append('  ' * depth + repr(i))
+            _out = self.sprawl_component(i, depth+1, '\n'.join(_out)).split('\n')
+        return '\n'.join(_out)
+
+ComponentTests.run_tests()
+
+"""
 
 class Component:
     def __init__(self, view=None, handle=None):
