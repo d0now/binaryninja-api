@@ -4095,6 +4095,10 @@ namespace BinaryNinja {
 		BNDeadStoreElimination GetVariableDeadStoreElimination(const Variable& var);
 		void SetVariableDeadStoreElimination(const Variable& var, BNDeadStoreElimination mode);
 
+		std::map<Variable, std::set<Variable>> GetMergedVariables();
+		void MergeVariables(const Variable& target, const std::set<Variable>& sources);
+		void UnmergeVariables(const Variable& target, const std::set<Variable>& sources);
+
 		uint64_t GetHighestAddress();
 		uint64_t GetLowestAddress();
 		std::vector<BNAddressRange> GetAddressRanges();

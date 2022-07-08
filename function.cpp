@@ -2518,6 +2518,81 @@ void Function::SetVariableDeadStoreElimination(const Variable& var, BNDeadStoreE
 }
 
 
+std::map<Variable, std::set<Variable>> Function::GetMergedVariables()
+{
+	size_t count;
+	BNMergedVariable* mergedVars = BNGetMergedVariables(m_object, &count);
+
+	std::map<Variable, std::set<Variable>> result;
+	for (size_t i = 0; i < count; i++)
+	{
+		Variable target;
+		target.type = mergedVars[i].target.type;
+		target.index = mergedVars[i].target.index;
+		target.storage = mergedVars[i].target.storage;
+
+		set<Variable> sources;
+		for (size_t j = 0; j < mergedVars[i].sourceCount; j++)
+		{
+			Variable source;
+			source.type = mergedVars[i].sources[j].type;
+			source.index = mergedVars[i].sources[j].index;
+			source.storage = mergedVars[i].sources[j].storage;
+			sources.insert(source);
+		}
+
+		result[target] = sources;
+	}
+
+	BNFreeMergedVariableList(mergedVars, count);
+	return result;
+}
+
+
+void Function::MergeVariables(const Variable& target, const std::set<Variable>& sources)
+{
+	BNVariable targetData;
+	targetData.type = target.type;
+	targetData.index = target.index;
+	targetData.storage = target.storage;
+
+	BNVariable* sourceData = new BNVariable[sources.size()];
+	size_t i = 0;
+	for (auto& var : sources)
+	{
+		sourceData[i].type = var.type;
+		sourceData[i].index = var.index;
+		sourceData[i].storage = var.storage;
+		i++;
+	}
+
+	BNMergeVariables(m_object, &targetData, sourceData, sources.size());
+	delete[] sourceData;
+}
+
+
+void Function::UnmergeVariables(const Variable& target, const std::set<Variable>& sources)
+{
+	BNVariable targetData;
+	targetData.type = target.type;
+	targetData.index = target.index;
+	targetData.storage = target.storage;
+
+	BNVariable* sourceData = new BNVariable[sources.size()];
+	size_t i = 0;
+	for (auto& var : sources)
+	{
+		sourceData[i].type = var.type;
+		sourceData[i].index = var.index;
+		sourceData[i].storage = var.storage;
+		i++;
+	}
+
+	BNUnmergeVariables(m_object, &targetData, sourceData, sources.size());
+	delete[] sourceData;
+}
+
+
 vector<ILReferenceSource> Function::GetMediumLevelILVariableReferences(const Variable& var)
 {
 	size_t count;

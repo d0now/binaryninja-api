@@ -2842,6 +2842,13 @@ extern "C"
 		const char* channel;
 	};
 
+	struct BNMergedVariable
+	{
+		BNVariable target;
+		BNVariable* sources;
+		size_t sourceCount;
+	};
+
 	BINARYNINJACOREAPI char* BNAllocString(const char* contents);
 	BINARYNINJACOREAPI void BNFreeString(char* str);
 	BINARYNINJACOREAPI char** BNAllocStringList(const char** contents, size_t size);
@@ -3987,6 +3994,12 @@ extern "C"
 	    BNFunction* func, const BNVariable* var);
 	BINARYNINJACOREAPI void BNSetFunctionVariableDeadStoreElimination(
 	    BNFunction* func, const BNVariable* var, BNDeadStoreElimination mode);
+	BINARYNINJACOREAPI BNMergedVariable* BNGetMergedVariables(BNFunction* func, size_t* count);
+	BINARYNINJACOREAPI void BNFreeMergedVariableList(BNMergedVariable* vars, size_t count);
+	BINARYNINJACOREAPI void BNMergeVariables(BNFunction* func, const BNVariable* target, const BNVariable* sources,
+		size_t sourceCount);
+	BINARYNINJACOREAPI void BNUnmergeVariables(BNFunction* func, const BNVariable* target, const BNVariable* sources,
+		size_t sourceCount);
 
 	BINARYNINJACOREAPI BNReferenceSource* BNGetFunctionCallSites(BNFunction* func, size_t* count);
 	BINARYNINJACOREAPI uint64_t* BNGetCallees(BNBinaryView* view, BNReferenceSource* callSite, size_t* count);
