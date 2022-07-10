@@ -15,10 +15,10 @@
 #include "fontsettings.h"
 
 
-class BINARYNINJAUIAPI MemoryMapSidebarWidgetItem : public QTableWidgetItem
+class BINARYNINJAUIAPI DataComparedTableItem : public QTableWidgetItem
 {
 public:
-	MemoryMapSidebarWidgetItem(const QString& text, int type=QTableWidgetItem::ItemType::Type): QTableWidgetItem(text, type) {};
+	DataComparedTableItem(const QString& text, int type=QTableWidgetItem::ItemType::Type): QTableWidgetItem(text, type) {};
 	bool operator<(const QTableWidgetItem& other) const;
 };
 
@@ -45,25 +45,98 @@ public:
 };
 
 
-class BINARYNINJAUIAPI MemoryMapSidebarWidget : public SidebarWidget
+class BINARYNINJAUIAPI SectionDialog : public QDialog
+{
+
+	QPushButton* m_acceptButton;
+	QPushButton* m_cancelButton;
+	QLineEdit* m_nameField;
+	QLineEdit* m_startField;
+	QLineEdit* m_lengthField;
+	QComboBox* m_semanticsField;
+
+	BinaryViewRef m_data;
+	SectionRef m_section;
+
+	void Submit();
+public:
+	SectionDialog(QWidget* parent, BinaryViewRef data, SectionRef section = nullptr);
+};
+
+
+class BINARYNINJAUIAPI SegmentWidget : public QWidget, public BinaryNinja::BinaryDataNotification
+{
+	enum SEGMENT_COLUMN {
+		START = 0,
+		END,
+		DATA_OFFSET,
+		DATA_LENGTH,
+		FLAGS,
+		COLUMN_COUNT,
+	};
+
+	BinaryViewRef m_data;
+	QTableWidget* m_table;
+	std::mutex m_updateMutex;
+
+	void updateInfo();
+	void showContextMenu(const QPoint& point);
+
+public:
+	SegmentWidget(BinaryViewRef data);
+
+	void updateFont() { setFont(getMonospaceFont(this)); }
+
+	virtual void OnSegmentAdded(BinaryNinja::BinaryView* data, BinaryNinja::Segment* segment) override { updateInfo(); };
+	virtual void OnSegmentUpdated(BinaryNinja::BinaryView* data, BinaryNinja::Segment* segment) override { updateInfo(); };
+	virtual void OnSegmentRemoved(BinaryNinja::BinaryView* data, BinaryNinja::Segment* segment) override { updateInfo(); };
+};
+
+
+class BINARYNINJAUIAPI SectionWidget : public QWidget, public BinaryNinja::BinaryDataNotification
+{
+	enum SECTION_COLUMN {
+		NAME = 0,
+		START,
+		END,
+		SEMANTICS,
+		COLUMN_COUNT,
+	};
+
+	BinaryViewRef m_data;
+	QTableWidget* m_table;
+	std::mutex m_updateMutex;
+
+	void updateInfo();
+	void showContextMenu(const QPoint& point);
+
+public:
+	SectionWidget(BinaryViewRef data);
+
+	void updateFont() { setFont(getMonospaceFont(this)); }
+
+	virtual void OnSectionAdded(BinaryNinja::BinaryView* data, BinaryNinja::Section* section) override { updateInfo(); };
+	virtual void OnSectionUpdated(BinaryNinja::BinaryView* data, BinaryNinja::Section* section) override { updateInfo(); };
+	virtual void OnSectionRemoved(BinaryNinja::BinaryView* data, BinaryNinja::Section* section) override { updateInfo(); };
+};
+
+
+class BINARYNINJAUIAPI MemoryMapSidebarWidget : public SidebarWidget, public BinaryNinja::BinaryDataNotification
 {
 	Q_OBJECT
 
-	QTableWidget* m_sectionTable;
-	QTableWidget* m_segmentTable;
+	SectionWidget* m_sectionWidget;
+	SegmentWidget* m_segmentWidget;
 	QWidget* m_header;
 	BinaryViewRef m_data;
-
-	void showSegmentContextMenu(const QPoint& point);
-	void showSectionContextMenu(const QPoint& point);
-	void updateInfo();
 
   public:
 	MemoryMapSidebarWidget(ViewFrame* view, BinaryViewRef data);
 
-	void notifyFontChanged() override { setFont(getMonospaceFont(this)); }
+	void notifyFontChanged() override;
 	QWidget* headerWidget() override { return m_header; }
 };
+
 
 class BINARYNINJAUIAPI MemoryMapSidebarWidgetType : public SidebarWidgetType
 {
