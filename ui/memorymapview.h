@@ -7,6 +7,7 @@
 #include <QtWidgets/QTableWidget>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QStyledItemDelegate>
 
 #include "dockhandler.h"
 #include "render.h"
@@ -20,6 +21,14 @@ class BINARYNINJAUIAPI DataComparedTableItem : public QTableWidgetItem
 public:
 	DataComparedTableItem(const QString& text, int type=QTableWidgetItem::ItemType::Type): QTableWidgetItem(text, type) {};
 	bool operator<(const QTableWidgetItem& other) const;
+};
+
+
+class BINARYNINJAUIAPI MemoryMapItemDelegate : public QStyledItemDelegate
+{
+public:
+	MemoryMapItemDelegate(QObject* parent = nullptr): QStyledItemDelegate(parent) {};
+	virtual void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };
 
 
@@ -66,6 +75,8 @@ public:
 
 class BINARYNINJAUIAPI SegmentWidget : public QWidget, public BinaryNinja::BinaryDataNotification
 {
+	Q_OBJECT
+
 	enum SEGMENT_COLUMN {
 		START = 0,
 		END,
@@ -86,15 +97,22 @@ public:
 	SegmentWidget(BinaryViewRef data);
 
 	void updateFont() { setFont(getMonospaceFont(this)); }
+	void highlightRelatedSegments(SectionRef section);
+	void itemChanged(QTableWidgetItem* current, QTableWidgetItem* previous);
 
 	virtual void OnSegmentAdded(BinaryNinja::BinaryView* data, BinaryNinja::Segment* segment) override { updateInfo(); };
 	virtual void OnSegmentUpdated(BinaryNinja::BinaryView* data, BinaryNinja::Segment* segment) override { updateInfo(); };
 	virtual void OnSegmentRemoved(BinaryNinja::BinaryView* data, BinaryNinja::Segment* segment) override { updateInfo(); };
+
+Q_SIGNALS:
+	void currentSegmentChanged(SegmentRef current);
 };
 
 
 class BINARYNINJAUIAPI SectionWidget : public QWidget, public BinaryNinja::BinaryDataNotification
 {
+	Q_OBJECT
+
 	enum SECTION_COLUMN {
 		NAME = 0,
 		START,
@@ -114,10 +132,15 @@ public:
 	SectionWidget(BinaryViewRef data);
 
 	void updateFont() { setFont(getMonospaceFont(this)); }
+	void highlightRelatedSections(SegmentRef segment);
+	void itemChanged(QTableWidgetItem* current, QTableWidgetItem* previous);
 
 	virtual void OnSectionAdded(BinaryNinja::BinaryView* data, BinaryNinja::Section* section) override { updateInfo(); };
 	virtual void OnSectionUpdated(BinaryNinja::BinaryView* data, BinaryNinja::Section* section) override { updateInfo(); };
 	virtual void OnSectionRemoved(BinaryNinja::BinaryView* data, BinaryNinja::Section* section) override { updateInfo(); };
+
+Q_SIGNALS:
+	void currentSectionChanged(SectionRef current);
 };
 
 
